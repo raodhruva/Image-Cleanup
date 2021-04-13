@@ -9,15 +9,15 @@ import random
 #sample input /Users/dhruva/Downloads/trial3.png ⁩
 #sample output /Users/dhruva/Downloads/trial100.png 
 
-# mess around with LIGHT_TOL for different thresholds on what is considered light
+# change LIGHT_TOL for different thresholds on what is considered "light"
 LIGHT_TOL = 200
 
-# GRAY_LOW decides how dark the grey can get
-# GREY_VARIANCE accounts for how far apart RGB can be from each other while making gray
+# GRAY_LOW decides how dark a gray we can accept
+# GRAY_VARIANCE accounts for how far apart RGB can be from each other while making gray
 GRAY_LOW = 120
 GRAY_VARIANCE = 20
 
-#
+# function that classifies pixels as white, light or colored based on tolerance conditions
 def createPixelNatureMatrix(image):
     x, y, d = image.shape
     pixelNatureMatrix = np.zeros((x, y))
@@ -37,6 +37,7 @@ def createPixelNatureMatrix(image):
                 pixelNatureMatrix[i, j] = 2
     return pixelNatureMatrix
 
+# function that returns neighbours of given pixel to add to stack
 def getNeighbors(cur_x, cur_y):
     neighbors = []
     if cur_x != 0:
@@ -49,6 +50,7 @@ def getNeighbors(cur_x, cur_y):
         neighbors.append([cur_x, cur_y + 1])
     return neighbors
 
+# iterator function that "increments" by sending pointer in a direction
 def go_direction(direction, pixel):
     xa = 0
     ya = 0
@@ -75,7 +77,12 @@ def go_direction(direction, pixel):
         
     return 0
     
-        
+'''performs an additional check on island pixels to make sure the pixel should actually be removed. 
+
+    This is done by keeping track of each "island" of pixels. Then a set of random pixels are chosen from the island and
+    traversed in one direction until a dark pixel, boundary, or white pixel is reached. If a dark pixel is found in all
+    directions then the island shouldnt be removed.
+'''
 def island_boundary_check(image, island):
     l = len(island)
     test_points = random.sample(range(0, l), 10)
@@ -86,6 +93,8 @@ def island_boundary_check(image, island):
         if go_direction("left", pixel) + go_direction("right", pixel) + go_direction("up", pixel) + go_direction("down", pixel) == 4:
             counter += 1
     return counter
+
+# performs an iterative DFS on the image to find and store the islands. They are stored in light_pixel_list
 
 def Iterative_DFS(inputPath):
     image = np.array(Image.open(inputPath), dtype = np.uint8)
@@ -147,6 +156,7 @@ def Iterative_DFS(inputPath):
     image = Image.fromarray(image)
     return light_pixel_list
 
+# main function : pass input file path as argument 1 and output path as argument 2 while running this program.
 if __name__ == '__main__':
     inputFile = sys.argv[1]
     outputPath = sys.argv[2]
